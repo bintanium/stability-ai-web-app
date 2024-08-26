@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Hub - Unleash the Power of AI for Your Creative Projects</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+           @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-5px); }
+        100% { transform: translateY(0px); }
+    }
+    .animate-float {
+        animation: float 3s ease-in-out infinite;
+    }
+        .gradient-bg {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        }
+        .sticky-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            transition: background-color 0.3s ease;
+        }
+        .sticky-header.scrolled {
+            background-color: rgba(17, 24, 39, 0.9);
+        }
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <header class="gradient-bg shadow-lg sticky-header">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <div class="flex items-center">
+                <img src="/images/logo.png" alt="AI Hub Logo" class="h-8 w-8 mr-3 animate-float">
+                <span class="text-2xl font-bold">AI Hub</span>
+            </div>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#features" class="hover:text-blue-400 transition">Features</a>
+                <a href="#examples" class="hover:text-blue-400 transition">Examples</a>
+                <a href="#pricing" class="hover:text-blue-400 transition">Pricing</a>
+                <a href="#faq" class="hover:text-blue-400 transition">FAQ</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="/login.html" class="px-4 py-2 rounded-md border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition">Login</a>
+                <a href="/signup.html" class="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 transition">Sign Up</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero" class="py-20 text-center fade-in">
+            <div class="container mx-auto px-6">
+                <h1 class="text-5xl font-bold mb-6">Unleash the Power of AI</h1>
+                <p class="text-xl mb-12">Transform your creative projects with cutting-edge AI technology</p>
+                <a href="/signup.html" class="px-8 py-3 rounded-md bg-blue-600 hover:bg-blue-700 text-lg font-semibold transition">Get Started for Free</a>
+            </div>
+        </section>
+
+        <section id="features" class="py-20 bg-gray-800 fade-in">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-12">Key Features</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                    <div class="text-center">
+                        <i class="fas fa-magic text-4xl text-blue-500 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2">AI-Powered Image Generation</h3>
+                        <p>Create stunning visuals from text descriptions in seconds</p>
+                    </div>
+                    <div class="text-center">
+                        <i class="fas fa-paint-brush text-4xl text-blue-500 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2">Style Transfer</h3>
+                        <p>Apply artistic styles to your images with a single click</p>
+                    </div>
+                    <div class="text-center">
+                        <i class="fas fa-expand-arrows-alt text-4xl text-blue-500 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2">Image Upscaling</h3>
+                        <p>Enhance image resolution without losing quality</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="examples" class="py-20 fade-in">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-12">See AI Hub in Action</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Replace with actual AI-generated images -->
+                    <img src="https://via.placeholder.com/400x300" alt="AI-generated image" class="rounded-lg shadow-lg">
+                    <img src="https://via.placeholder.com/400x300" alt="AI-generated image" class="rounded-lg shadow-lg">
+                    <img src="https://via.placeholder.com/400x300" alt="AI-generated image" class="rounded-lg shadow-lg">
+                </div>
+            </div>
+        </section>
+
+        <section id="testimonials" class="py-20 bg-gray-800 fade-in">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-12">What Our Users Say</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <div class="bg-gray-700 p-6 rounded-lg shadow-lg">
+                        <p class="mb-4">"AI Hub has revolutionized my workflow. I can now create stunning visuals in minutes instead of hours!"</p>
+                        <p class="font-semibold">- Sarah J., Graphic Designer</p>
+                    </div>
+                    <div class="bg-gray-700 p-6 rounded-lg shadow-lg">
+                        <p class="mb-4">"The image upscaling feature is a game-changer. I can now use my old photos for large prints without any loss in quality."</p>
+                        <p class="font-semibold">- Mike T., Photographer</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="pricing" class="py-20 fade-in">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-12">Choose Your Plan</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-gray-800 p-8 rounded-lg shadow-lg">
+                        <h3 class="text-2xl font-bold mb-4">Basic</h3>
+                        <p class="text-4xl font-bold mb-6">$9<span class="text-xl font-normal">/month</span></p>
+                        <ul class="mb-8">
+                            <li class="mb-2"><i class="fas fa-check text-green-500 mr-2"></i>100 AI generations/month</li>
+                            <li class="mb-2"><i class="fas fa-check text-green-500 mr-2"></i>Basic style transfer</li>
+                            <li class="mb-2"><i class="fas fa-check text-green-500 mr-2"></i>720p upscaling</li>
+                        </ul>
+                        <a href="/signup.html" class="block text-center px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 transition">Get Started</a>
+                    </div>
+                    <div class="bg-blue-600 p-8 rounded-lg shadow-lg transform scale-105">
+                        <h3 class="text-2xl font-bold mb-4">Pro</h3>
+                        <p class="text-4xl font-bold mb-6">$29<span class="text-xl font-normal">/month</span></p>
+                        <ul class="mb-8">
+                            <li class="mb-2"><i class="fas fa-check text-green-300 mr-2"></i>500 AI generations/month</li>
+                            <li class="mb-2"><i class="fas fa-check text-green-300 mr-2"></i>Advanced style transfer</li>
+                            <li class="mb-2"><i class="fas fa-check text-green-300 mr-2"></i>4K upscaling</li>
+                            <li class="mb-2"><i class="fas fa-check text-green-300 mr-2"></i>Priority support</li>
+                        </ul>
+                        <a href="/signup.html" class="block text-center px-4 py-2 rounded-md bg-white text-blue-600 hover:bg-gray-100 transition">Get Started</a>
+                    </div>
+                    <div class="bg-gray-800 p-8 rounded-lg shadow-lg">
+                        <h3 class="text-2xl font-bold mb-4">Enterprise</h3>
+                        <p class="text-4xl font-bold mb-6">Custom</p>
+                        <ul class="mb-8">
+                            <li class="mb-2"><i class="fas fa-check text-green-500 mr-2"></i>Unlimited AI generations</li>
+                            <li class="mb-2"><i class="fas fa-check text-green-500 mr-2"></i>Custom AI model training</li>
+                            <li class="mb-2"><i class="fas fa-check text-green-500 mr-2"></i>8K upscaling</li>
+                            <li class="mb-2"><i class="fas fa-check text-green-500 mr-2"></i>Dedicated support</li>
+                        </ul>
+                        <a href="#" class="block text-center px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 transition">Contact Us</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="faq" class="py-20 bg-gray-800 fade-in">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+                <div class="space-y-8">
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">How does AI image generation work?</h3>
+                        <p>Our AI uses advanced machine learning algorithms to understand text descriptions and generate corresponding images. It's trained on millions of images to create unique visuals based on your input.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">Can I use the generated images commercially?</h3>
+                        <p>Yes, all images generated using AI Hub are royalty-free and can be used for both personal and commercial purposes.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">Is my data safe?</h3>
+                        <p>We take data privacy seriously. All uploaded images and generated content are encrypted and securely stored. We never share your data with third parties.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="gradient-bg py-10">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-wrap justify-between items-center">
+                <div class="w-full md:w-1/3 mb-6 md:mb-0">
+                    <img src="/images/logo.png" alt="AI Hub Logo" class="h-10 w-10 mb-2">
+                    <p>Empowering creativity with AI</p>
+                </div>
+                <div class="w-full md:w-1/3 mb-6 md:mb-0">
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-blue-400 transition">About Us</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition">Blog</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition">Careers</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="w-full md:w-1/3">
+                    <h4 class="text-lg font-semibold mb-4">Connect With Us</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-2xl hover:text-blue-400 transition"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-2xl hover:text-blue-400 transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-2xl hover:text-blue-400 transition"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-2xl hover:text-blue-400 transition"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 text-center">
+                <p>&copy; 2024 AI Hub. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Sticky header
+        const header = document.querySelector('.sticky-header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 0) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Scroll animations
+        const fadeElems = document.querySelectorAll('.fade-in');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        fadeElems.forEach(elem => observer.observe(elem));
+    </script>
+</body>
+</html>

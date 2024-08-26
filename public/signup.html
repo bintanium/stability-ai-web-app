@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - AI Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #111827;
+            color: #f3f4f6;
+        }
+        .signup-container {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            animation: fadeInUp 0.6s ease-out;
+        }
+        .input-field {
+            background-color: #374151;
+            color: #f3f4f6;
+            border: 1px solid #4b5563;
+        }
+        .input-field:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+        }
+        .btn-signup {
+            background-color: #3b82f6;
+            transition: all 0.3s ease;
+        }
+        .btn-signup:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite, fadeInUp 0.6s ease-out;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+    <div class="signup-container p-8 rounded-lg shadow-2xl w-full max-w-md">
+        <div class="text-center mb-8">
+            <img src="/images/logo.png" alt="AI Hub Logo" class="w-20 h-20 mx-auto mb-4 animate-float">
+            <h1 class="text-3xl font-bold">Join AI Hub</h1>
+            <p class="text-gray-400">Create an account to access AI-powered tools</p>
+        </div>
+        <form id="signupForm" class="space-y-6">
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-300 mb-1">Full Name</label>
+                <input type="text" id="name" name="name" required class="input-field w-full px-3 py-2 rounded-md focus:outline-none transition duration-300">
+            </div>
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                <input type="email" id="email" name="email" required class="input-field w-full px-3 py-2 rounded-md focus:outline-none transition duration-300">
+            </div>
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                <input type="password" id="password" name="password" required class="input-field w-full px-3 py-2 rounded-md focus:outline-none transition duration-300">
+            </div>
+            <div>
+                <label for="confirmPassword" class="block text-sm font-medium text-gray-300 mb-1">Confirm Password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required class="input-field w-full px-3 py-2 rounded-md focus:outline-none transition duration-300">
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" id="terms" name="terms" required class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                <label for="terms" class="ml-2 block text-sm text-gray-300">I agree to the <a href="/terms.html" class="text-blue-400 hover:text-blue-300">Terms and Conditions</a></label>
+            </div>
+            <button type="submit" class="btn-signup w-full py-2 px-4 rounded-md text-white font-semibold shadow-lg">
+                Sign Up
+            </button>
+        </form>
+        <p class="mt-6 text-center text-sm text-gray-400">
+            Already have an account? <a href="/login.html" class="text-blue-400 hover:text-blue-300">Log in</a>
+        </p>
+    </div>
+
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+    
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+    
+            // Simpan user ke localStorage
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            users.push({ name, email, password });
+            localStorage.setItem('users', JSON.stringify(users));
+    
+            alert('Sign up successful. Please log in.');
+            window.location.href = '/login.html';
+        });
+    </script>
+</body>
+</html>

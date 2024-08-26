@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat GPT - AI Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #111827;
+            color: #f3f4f6;
+        }
+        .chat-container {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        }
+        .message {
+            max-width: 70%;
+        }
+        .user-message {
+            background-color: #3b82f6;
+            align-self: flex-end;
+        }
+        .bot-message {
+            background-color: #4b5563;
+            align-self: flex-start;
+        }
+        .input-field {
+            background-color: #374151;
+            color: #f3f4f6;
+            border: 1px solid #4b5563;
+        }
+        .input-field:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+        }
+        .btn-send {
+            background-color: #3b82f6;
+            transition: all 0.3s ease;
+        }
+        .btn-send:hover {
+            background-color: #2563eb;
+        }
+
+        /* Tambahkan style untuk header dan menu */
+        .header {
+            background: linear-gradient(to right, #1f2937, #2563eb);
+            border-bottom: 1px solid #4b5563;
+        }
+        .menu-item {
+            position: relative;
+        }
+        .submenu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: #1f2937;
+            border: 1px solid #4b5563;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0;
+            z-index: 20;
+            min-width: 150px;
+            white-space: nowrap;
+        }
+        .menu-item:hover .submenu {
+            display: block;
+        }
+        .submenu a {
+            display: block;
+            padding: 0.5rem 1rem;
+            color: #f3f4f6;
+            text-decoration: none;
+        }
+        .submenu a:hover {
+            background-color: #374151;
+        }
+        .credit-indicator {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        /* Tambahkan style untuk sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: #1f2937;
+            overflow-y: auto;
+        }
+        .chat-history-item {
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-title {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #e5e7eb; /* Warna teks untuk judul chat */
+        }
+        .chat-time {
+            font-size: 0.75rem;
+            color: #60a5fa; /* Ubah warna teks menjadi biru yang lebih tua */
+        }
+        .chat-history-item:hover {
+            background-color: #374151;
+        }
+        .chat-history-item.active {
+            background-color: #3b82f6;
+        }
+        .chat-history-item.active .chat-title,
+        .chat-history-item.active .chat-time {
+            color: #ffffff; /* Warna teks saat item aktif */
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen">
+    <header class="header p-4 flex items-center justify-between sticky-header">
+        <div class="flex items-center space-x-2">
+            <img src="/images/logo.png" alt="AI Hub Logo" class="h-8 w-8">
+            <span class="text-white font-bold text-xl">AI Hub</span>
+        </div>
+        <nav class="flex items-center space-x-6">
+            <div class="menu-item">
+                <span class="text-white cursor-pointer">Services</span>
+                <div class="submenu">
+                    <a href="/imagegeneration.html">Image Generation</a>
+                    <a href="/chatgpt.html" class="text-gray-300 hover:text-white">Chat GPT</a>
+                    <a href="#" onclick="switchService('suno')">Suno</a>
+                    <a href="#" onclick="switchService('other-ai')">Other AI</a>
+                </div>
+            </div>
+            <a href="#" class="text-white">Pricing</a>
+            <a href="#" class="text-white">Support</a>
+            <div class="credit-indicator">
+                Credits: <span id="userCredits">1000</span>
+            </div>
+            <div class="relative group menu-item">
+                <button class="flex items-center space-x-1 focus:outline-none">
+                    <span class="text-white">Account</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                <div class="submenu">
+                    <a href="#" onclick="switchService('profile')">Profile</a>
+                    <a href="#" onclick="switchService('settings')">Settings</a>
+                    <a href="#" onclick="logout()">Logout</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="flex-grow flex overflow-hidden">
+        <!-- Sidebar untuk riwayat chat -->
+        <aside class="sidebar p-4 border-r border-gray-700">
+            <h2 class="text-xl font-bold mb-4">Chat History</h2>
+            <div id="chat-history" class="space-y-2">
+                <!-- Riwayat chat akan ditambahkan di sini secara dinamis -->
+            </div>
+        </aside>
+
+        <!-- Main content -->
+        <main class="main-content flex-grow overflow-hidden flex flex-col">
+            <div id="chat-messages" class="flex-grow p-4 overflow-y-auto space-y-4"></div>
+            <div class="p-4 bg-gray-800">
+                <form id="chat-form" class="flex space-x-2">
+                    <input type="text" id="user-input" class="input-field flex-grow px-3 py-2 rounded-md focus:outline-none" placeholder="Type your message...">
+                    <button type="submit" class="btn-send px-4 py-2 rounded-md text-white font-semibold">Send</button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        function isLoggedIn() {
+            return localStorage.getItem('authToken') !== null;
+        }
+
+        if (!isLoggedIn()) {
+            window.location.href = '/login.html';
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            window.location.href = '/login.html';
+        }
+
+        const chatMessages = document.getElementById('chat-messages');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+
+        let currentChatId = null;
+        const chatHistory = document.getElementById('chat-history');
+
+        function createNewChat() {
+            currentChatId = Date.now().toString();
+            const chatItem = document.createElement('div');
+            chatItem.classList.add('chat-history-item', 'p-2', 'rounded', 'active');
+            
+            const chatTitle = document.createElement('span');
+            chatTitle.classList.add('chat-title');
+            chatTitle.textContent = `New Chat`;
+            
+            const chatTime = document.createElement('span');
+            chatTime.classList.add('chat-time');
+            chatTime.textContent = formatDate(new Date());
+            
+            chatItem.appendChild(chatTitle);
+            chatItem.appendChild(chatTime);
+            
+            chatItem.dataset.chatId = currentChatId;
+            chatItem.onclick = () => loadChat(currentChatId);
+            chatHistory.prepend(chatItem);
+            clearChatMessages();
+        }
+
+        function formatDate(date) {
+            const options = { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit'
+            };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        function loadChat(chatId) {
+            // Implementasi untuk memuat chat berdasarkan ID
+            console.log(`Loading chat ${chatId}`);
+            document.querySelectorAll('.chat-history-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.chatId === chatId) {
+                    item.classList.add('active');
+                }
+            });
+            currentChatId = chatId;
+            clearChatMessages();
+            
+            // Load and display messages from storage
+            const messages = loadChatFromStorage(chatId);
+            messages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', 'p-3', 'rounded-lg', msg.sender === 'user' ? 'user-message' : 'bot-message');
+                messageDiv.textContent = msg.text;
+                chatMessages.appendChild(messageDiv);
+            });
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function clearChatMessages() {
+            chatMessages.innerHTML = '';
+        }
+
+        function addMessage(sender, text) {
+            if (!currentChatId) {
+                createNewChat();
+            }
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', 'p-3', 'rounded-lg', sender === 'user' ? 'user-message' : 'bot-message');
+            messageDiv.textContent = text;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Update chat title in history
+            const chatItem = document.querySelector(`.chat-history-item[data-chat-id="${currentChatId}"]`);
+            if (chatItem) {
+                const chatTitle = chatItem.querySelector('.chat-title');
+                if (chatTitle) {
+                    chatTitle.textContent = text.substring(0, 30) + (text.length > 30 ? '...' : '');
+                }
+            }
+            
+            // Save message to localStorage
+            const messages = loadChatFromStorage(currentChatId);
+            messages.push({ sender, text });
+            saveChat(currentChatId, messages);
+        }
+
+        // Tambahkan fungsi ini untuk menyimpan chat ke localStorage
+        function saveChat(chatId, messages) {
+            localStorage.setItem(`chat_${chatId}`, JSON.stringify(messages));
+        }
+
+        // Tambahkan fungsi ini untuk memuat chat dari localStorage
+        function loadChatFromStorage(chatId) {
+            const savedChat = localStorage.getItem(`chat_${chatId}`);
+            return savedChat ? JSON.parse(savedChat) : [];
+        }
+
+        // Tambahkan variabel ini di bagian atas script Anda
+        let lastRequestTime = 0;
+        const MIN_REQUEST_INTERVAL = 3000; // Increase to 3 seconds
+
+        async function callGPTAPI(message) {
+            try {
+                const now = Date.now();
+                if (now - lastRequestTime < MIN_REQUEST_INTERVAL) {
+                    await new Promise(resolve => setTimeout(resolve, MIN_REQUEST_INTERVAL - (now - lastRequestTime)));
+                }
+                lastRequestTime = Date.now();
+
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                if (!response.ok) {
+                    if (response.status === 429) {
+                        // Tunggu sebentar dan coba lagi
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        return callGPTAPI(message); // Rekursif, hati-hati dengan infinite loop
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.reply;
+            } catch (error) {
+                console.error("Error calling GPT API:", error);
+                return "Sorry, I encountered an error while processing your request. Please try again later.";
+            }
+        }
+
+        // Ubah event listener form submission
+        chatForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const message = userInput.value.trim();
+            if (message) {
+                addMessage('user', message);
+                userInput.value = '';
+                
+                // Panggil API GPT
+                const botResponse = await callGPTAPI(message);
+                addMessage('bot', botResponse);
+            }
+        });
+
+        // Load chat history on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load existing chats from localStorage
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('chat_')) {
+                    const chatId = key.split('_')[1];
+                    const messages = loadChatFromStorage(chatId);
+                    if (messages.length > 0) {
+                        const chatItem = document.createElement('div');
+                        chatItem.classList.add('chat-history-item', 'p-2', 'rounded');
+                        
+                        const chatTitle = document.createElement('span');
+                        chatTitle.classList.add('chat-title');
+                        chatTitle.textContent = messages[0].text.substring(0, 30) + (messages[0].text.length > 30 ? '...' : '');
+                        
+                        const chatTime = document.createElement('span');
+                        chatTime.classList.add('chat-time');
+                        chatTime.textContent = formatDate(new Date(parseInt(chatId)));
+                        
+                        chatItem.appendChild(chatTitle);
+                        chatItem.appendChild(chatTime);
+                        
+                        chatItem.dataset.chatId = chatId;
+                        chatItem.onclick = () => loadChat(chatId);
+                        chatHistory.appendChild(chatItem);
+                    }
+                }
+            });
+            
+            // If no chats exist, create a new one
+            if (chatHistory.children.length === 0) {
+                createNewChat();
+            } else {
+                // Load the most recent chat
+                loadChat(chatHistory.children[0].dataset.chatId);
+            }
+        });
+    </script>
+</body>
+</html>

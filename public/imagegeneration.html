@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background-color: #111827; /* Very dark blue-gray */
+            color: #f3f4f6;
+            overflow-x: hidden; /* Mencegah scrollbar horizontal pada body */
+        }
+        .header {
+            background: linear-gradient(to right, #1f2937, #2563eb); /* Dark blue-gray gradient */
+            border-bottom: 1px solid #4b5563;
+        }
+        .sidebar {
+            background-color: #1f2937; /* Dark blue-gray */
+            width: 350px; /* Fixed width for sidebar */
+        }
+        .main-content {
+            background-color: #111827; /* Very dark blue-gray */
+            flex: 1; /* Take up remaining space */
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+        .prompt-input {
+            background-color: #374151; /* Medium blue-gray */
+            color: #f3f4f6;
+            border: 1px solid #4b5563;
+        }
+        .btn-generate {
+            background-color: #3b82f6; /* Bright blue */
+            color: #ffffff;
+        }
+        .btn-generate:hover {
+            background-color: #2563eb; /* Slightly darker blue */
+        }
+        .loading-spinner {
+            border: 5px solid #1e293b;
+            border-top: 5px solid #3b82f6;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .dimension-btn {
+            background-color: #1f2937; /* Dark blue-gray */
+            color: #f3f4f6;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .dimension-btn:hover {
+            border-color: #3b82f6;
+        }
+        .dimension-btn.active {
+            border-color: #3b82f6;
+            outline: 2px solid #3b82f6;
+            outline-offset: -2px;
+        }
+        .dimension-btn svg rect,
+        .dimension-btn svg line {
+            transition: all 0.2s;
+        }
+        .dimension-btn:hover svg rect,
+        .dimension-btn:hover svg line,
+        .dimension-btn.active svg rect,
+        .dimension-btn.active svg line {
+            stroke: #3b82f6;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #f3f4f6;
+        }
+        .input-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        .input-wrapper {
+            flex-grow: 1;
+            margin-right: 1rem;
+        }
+        .settings-container {
+            background: linear-gradient(to bottom, #1f2937, #111827); /* Dark blue-gray gradient */
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+        .group:hover .group-hover\:opacity-100 {
+            opacity: 1;
+        }
+        .transition-opacity {
+            transition-property: opacity;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 200ms;
+        }
+        #result {
+            overflow-y: auto;
+            overflow-x: hidden; /* Mencegah scrollbar horizontal pada result */
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        @media (min-width: 640px) {
+            .sidebar {
+                width: 350px;
+            }
+        }
+        @media (max-width: 639px) {
+            .sidebar {
+                width: 100%;
+            }
+        }
+
+        /* Tambahkan style berikut */
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .sticky-sidebar {
+            position: sticky;
+            top: 64px; /* Sesuaikan dengan tinggi header */
+            height: calc(100vh - 64px); /* Sesuaikan dengan tinggi header */
+            overflow-y: auto;
+        }
+
+        /* Sembunyikan scrollbar default tanpa menghilangkan fungsinya */
+        .hide-scrollbar {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* Internet Explorer 10+ */
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            display: none; /* Chrome, Safari, dan Opera */
+        }
+
+        /* Styling untuk custom scrollbar */
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: #4b5563 #1f2937;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+            border-radius: 4px;
+            border: 2px solid #1f2937;
+        }
+
+        /* Memperbaiki tampilan pada perangkat mobile */
+        @media (max-width: 639px) {
+            .flex-1.flex {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+            }
+            .main-content {
+                width: 100%;
+            }
+        }
+
+        /* Menyembunyikan scrollbar horizontal tanpa menghilangkan fungsinya */
+        .hide-horizontal-scrollbar {
+            overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* Internet Explorer and Edge */
+        }
+        .hide-horizontal-scrollbar::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, and Opera */
+        }
+
+        /* Tambahkan style untuk menu */
+        .menu-item {
+        position: relative;
+    }
+
+    .submenu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0; /* Ubah dari 'left: 0' menjadi 'right: 0' */
+        background-color: #1f2937;
+        border: 1px solid #4b5563;
+        border-radius: 0.375rem;
+        padding: 0.5rem 0;
+        z-index: 20;
+        min-width: 150px; /* Tambahkan lebar minimum */
+        white-space: nowrap; /* Mencegah wrapping teks */
+    }
+
+    .menu-item:hover .submenu {
+        display: block;
+    }
+
+    .submenu a {
+        display: block;
+        padding: 0.5rem 1rem;
+        color: #f3f4f6;
+        text-decoration: none;
+    }
+
+    .submenu a:hover {
+        background-color: #374151;
+    }
+
+    /* Menghilangkan scrollbar yang tidak diinginkan */
+    .hide-scrollbar {
+        -ms-overflow-style: none;  /* Internet Explorer and Edge */
+        scrollbar-width: none;  /* Firefox */
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;  /* Chrome, Safari, and Opera */
+    }
+</style>
+</head>
+<body class="flex flex-col h-screen hide-scrollbar">
+    <header class="header p-4 flex items-center justify-between sticky-header">
+        <div class="flex items-center space-x-2">
+            <img src="/images/logo.png" alt="Logo" class="h-8 w-8">
+            <span class="text-white font-bold">AI Hub</span>
+        </div>
+        <nav class="flex items-center space-x-6">
+            <div class="menu-item">
+                <span class="text-white">Services</span>
+                <div class="submenu">
+                    <a href="#" onclick="switchService('image-generation')">Image Generation</a>
+                    <a href="/chatgpt.html" class="text-gray-300 hover:text-white mr-4">Chat GPT</a>
+                    <a href="/suno.html" class="text-gray-300 hover:text-white">Suno AI</a>
+                    <a href="#" onclick="switchService('other-ai')">Other AI</a>
+                </div>
+            </div>
+            <a href="#" class="text-white">Pricing</a>
+            <a href="#" class="text-white">Support</a>
+            <div class="credit-indicator">
+                Credits: <span id="userCredits">1000</span>
+            </div>
+            <div class="relative group menu-item">
+                <button class="flex items-center space-x-1 focus:outline-none">
+                    <span>Account</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                <div class="submenu">
+                    <a href="#" onclick="switchService('profile')">Profile</a>
+                    <a href="#" onclick="switchService('settings')">Settings</a>
+                    <a href="#" onclick="switchService('logout')">Logout</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="flex-1 flex hide-horizontal-scrollbar">
+        <div class="sidebar p-4 overflow-y-auto sticky-sidebar hide-scrollbar custom-scrollbar" style="width: 350px;">
+            <div class="settings-container p-4 rounded-lg">
+                <h2 class="text-xl font-bold mb-4 text-white">Settings</h2>
+                <div class="mb-6">
+                    <label class="block mb-2 text-white flex items-center">
+                        Image Dimensions
+                        <span class="ml-2 text-sm text-gray-400 cursor-help" title="Choose the aspect ratio for your generated image">ⓘ</span>
+                    </label>
+                    <div class="flex flex-wrap -mx-1 mb-2">
+                        <div class="w-1/4 px-1 mb-2">
+                            <button class="dimension-btn flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 focus:outline-none w-full" data-ratio="2:3">
+                                <svg width="30" height="30" viewBox="0 0 40 40" class="mb-1">
+                                    <rect width="26" height="38" x="7" y="1" fill="none" stroke="currentColor" stroke-width="2" rx="2" ry="2" />
+                                </svg>
+                                <span class="text-xs whitespace-nowrap">2:3</span>
+                            </button>
+                        </div>
+                        <div class="w-1/4 px-1 mb-2">
+                            <button class="dimension-btn flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 focus:outline-none w-full" data-ratio="1:1">
+                                <svg width="30" height="30" viewBox="0 0 40 40" class="mb-1">
+                                    <rect width="38" height="38" x="1" y="1" fill="none" stroke="currentColor" stroke-width="2" rx="2" ry="2" />
+                                </svg>
+                                <span class="text-xs whitespace-nowrap">1:1</span>
+                            </button>
+                        </div>
+                        <div class="w-1/4 px-1 mb-2">
+                            <button class="dimension-btn flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 focus:outline-none w-full" data-ratio="16:9">
+                                <svg width="30" height="30" viewBox="0 0 40 40" class="mb-1">
+                                    <rect width="38" height="21" x="1" y="9.5" fill="none" stroke="currentColor" stroke-width="2" rx="2" ry="2" />
+                                </svg>
+                                <span class="text-xs whitespace-nowrap">16:9</span>
+                            </button>
+                        </div>
+                        <div class="w-1/4 px-1 mb-2">
+                            <button class="dimension-btn flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 focus:outline-none w-full" data-ratio="9:16">
+                                <svg width="30" height="30" viewBox="0 0 40 40" class="mb-1">
+                                    <rect width="21" height="38" x="9.5" y="1" fill="none" stroke="currentColor" stroke-width="2" rx="2" ry="2" />
+                                </svg>
+                                <span class="text-xs whitespace-nowrap">9:16</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap -mx-1">
+                        <div class="w-1/3 px-1">
+                            <button class="dimension-btn flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 focus:outline-none w-full" data-size="small">
+                                <span class="text-sm font-medium">Small</span>
+                                <span class="text-xs text-gray-400 size-display">1024x1024</span>
+                            </button>
+                        </div>
+                        <div class="w-1/3 px-1">
+                            <button class="dimension-btn flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 focus:outline-none w-full active" data-size="medium">
+                                <span class="text-sm font-medium">Medium</span>
+                                <span class="text-xs text-gray-400 size-display">1024x1024</span>
+                            </button>
+                        </div>
+                        <div class="w-1/3 px-1">
+                            <button class="dimension-btn flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200 focus:outline-none w-full" data-size="large">
+                                <span class="text-sm font-medium">Large</span>
+                                <span class="text-xs text-gray-400 size-display">1024x1024</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label for="imageCount" class="block mb-2 text-white">Number of Images: <span id="imageCountValue">1</span></label>
+                    <input type="range" id="imageCount" name="imageCount" min="1" max="4" value="1" class="w-full">
+                </div>
+                <div class="mb-4">
+                    <label for="negativePrompt" class="block mb-2 text-white">Negative Prompt</label>
+                    <textarea id="negativePrompt" class="prompt-input w-full p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter negative prompt here..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content p-4 flex flex-col flex-grow hide-horizontal-scrollbar">
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <input type="text" id="prompt" class="prompt-input w-full p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Describe your image, get playful">
+                </div>
+                <button id="generateBtn" onclick="generateImage()" class="btn-generate py-2 px-6 rounded-lg text-white font-semibold">Generate</button>
+            </div>
+            <div id="result" class="flex-grow overflow-y-auto mt-4 hide-horizontal-scrollbar"></div>
+        </div>
+    </div>
+
+    <div id="notification" class="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded-md shadow-lg hidden"></div>
+
+    <script>
+        let allGeneratedImages = [];
+
+        // Tambahkan variabel global untuk menyimpan timer
+        let loadingTimers = {};
+
+        // Tambahkan fungsi updateLoadingTime
+        function updateLoadingTime(index) {
+            const loadingElement = document.getElementById(`loading-time-${index}`);
+            if (loadingElement) {
+                const elapsedTime = Math.floor((Date.now() - allGeneratedImages[index].startTime) / 1000);
+                const minutes = Math.floor(elapsedTime / 60);
+                const seconds = elapsedTime % 60;
+                loadingElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        // Tambahkan fungsi showNotification
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.remove('hidden');
+            setTimeout(() => {
+                notification.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Modifikasi fungsi generateImage
+        async function generateImage() {
+            if (!useCredits(10)) { // Misalnya, setiap generasi gambar menggunakan 10 kredit
+                return;
+            }
+            const prompt = document.getElementById('prompt').value;
+            const negativePrompt = document.getElementById('negativePrompt').value;
+            const imageCount = parseInt(getSelectedImageCount());
+            const imageSize = getSelectedImageSize();
+            const aspectRatio = getSelectedAspectRatio();
+            
+            if (!prompt) {
+                showNotification('Please enter a prompt');
+                return;
+            }
+            
+            const startIndex = allGeneratedImages.length;
+            
+            // Add loading placeholders
+            for (let i = 0; i < imageCount; i++) {
+                allGeneratedImages.push({ 
+                    loading: true, 
+                    startTime: Date.now(),
+                    aspectRatio: aspectRatio
+                });
+                loadingTimers[startIndex + i] = setInterval(() => updateLoadingTime(startIndex + i), 1000);
+            }
+            updateGallery();
+
+            try {
+                const response = await fetch('/generate-image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt, negativePrompt, imageCount, imageSize })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('API response:', data);
+
+                if (!data.artifacts || !Array.isArray(data.artifacts) || data.artifacts.length === 0) {
+                    throw new Error('Invalid API response format or no images received');
+                }
+
+                // Update allGeneratedImages with the new images
+                data.artifacts.forEach((artifact, index) => {
+                    const imageIndex = startIndex + index;
+                    if (allGeneratedImages[imageIndex]) {
+                        allGeneratedImages[imageIndex] = {
+                            ...allGeneratedImages[imageIndex],
+                            loading: false,
+                            base64: artifact.base64,
+                            aspectRatio: aspectRatio
+                        };
+                        clearInterval(loadingTimers[imageIndex]);
+                        delete loadingTimers[imageIndex];
+                    }
+                });
+
+                updateGallery();
+                showNotification('Image(s) generated successfully!');
+            } catch (error) {
+                console.error('Error:', error);
+                // Remove loading placeholders on error
+                allGeneratedImages = allGeneratedImages.slice(0, startIndex);
+                for (let i = startIndex; i < startIndex + imageCount; i++) {
+                    clearInterval(loadingTimers[i]);
+                    delete loadingTimers[i];
+                }
+                updateGallery();
+                showNotification(`Error generating image(s): ${error.message}`);
+            }
+        }
+
+        // Update the updateGallery function
+        function updateGallery() {
+            const resultDiv = document.getElementById('result');
+            let galleryHTML = '';
+            
+            // Group images by aspect ratio
+            const groupedImages = allGeneratedImages.reduce((acc, img, index) => {
+                if (!acc[img.aspectRatio]) {
+                    acc[img.aspectRatio] = [];
+                }
+                acc[img.aspectRatio].push({...img, index});
+                return acc;
+            }, {});
+
+            // Create a row for each aspect ratio
+            Object.entries(groupedImages).forEach(([aspectRatio, images]) => {
+                galleryHTML += '<div class="flex flex-wrap -mx-2 mb-4">';
+                
+                images.forEach((artifact, i) => {
+                    if (i % 4 === 0 && i !== 0) {
+                        galleryHTML += '</div><div class="flex flex-wrap -mx-2 mb-4">';
+                    }
+
+                    let [width, height] = aspectRatio.split(':').map(Number);
+                    const aspectRatioValue = width / height;
+                    const thumbnailHeight = 250;
+                    const thumbnailWidth = Math.round(thumbnailHeight * aspectRatioValue);
+                    
+                    galleryHTML += `
+                        <div class="w-1/4 px-2 mb-4">
+                            <div class="relative group" style="padding-top: ${(height / width) * 100}%;">
+                    `;
+                    
+                    if (artifact.loading) {
+                        galleryHTML += `
+                            <div class="absolute inset-0 flex flex-col items-center justify-center bg-gray-800 rounded-lg">
+                                <div class="loading-spinner mb-2"></div>
+                                <div id="loading-time-${artifact.index}" class="text-sm text-gray-400">0:00</div>
+                            </div>
+                        `;
+                    } else {
+                        galleryHTML += `
+                            <img src="data:image/png;base64,${artifact.base64}" alt="Generated Image ${artifact.index + 1}" class="absolute inset-0 w-full h-full object-cover rounded-lg shadow-md">
+                            <div class="absolute inset-x-0 bottom-0 bg-gray-900 bg-opacity-75 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-4 rounded-b-lg">
+                                <div class="flex justify-center space-x-6">
+                                    <button onclick="downloadImage(${artifact.index})" class="text-white hover:text-blue-300 transition-colors duration-200" title="Download">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                    <button onclick="previewImage(${artifact.index})" class="text-white hover:text-blue-300 transition-colors duration-200" title="Preview">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </button>
+                                    <button onclick="upscaleImage(${artifact.index})" class="text-white hover:text-blue-300 transition-colors duration-200" title="Upscale">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </button>
+                                    <button onclick="deleteImage(${artifact.index})" class="text-white hover:text-blue-300 transition-colors duration-200" title="Delete">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    galleryHTML += `
+                            </div>
+                        </div>
+                    `;
+                });
+
+                galleryHTML += '</div>'; // Close flex container for this aspect ratio
+            });
+
+            resultDiv.innerHTML = galleryHTML;
+        }
+
+        function downloadImage(index) {
+            const base64 = allGeneratedImages[index].base64;
+            const link = document.createElement('a');
+            link.href = `data:image/png;base64,${base64}`;
+            link.download = `generated-image-${index + 1}.png`;
+            link.click();
+            showNotification('Image downloaded!');
+        }
+
+        function upscaleImage(index) {
+            // Implementasi upscale akan ditambahkan nanti
+            console.log('Upscale image:', index);
+            showNotification('Upscale feature coming soon!');
+        }
+
+        function deleteImage(index) {
+            allGeneratedImages.splice(index, 1);
+            updateGallery();
+            showNotification('Image deleted!');
+        }
+
+        function getSelectedImageSize() {
+            const activeRatioBtn = document.querySelector('.dimension-btn[data-ratio].active');
+            const activeSizeBtn = document.querySelector('.dimension-btn[data-size].active');
+            
+            let ratio = activeRatioBtn ? activeRatioBtn.dataset.ratio : '1:1';
+            let size = activeSizeBtn ? activeSizeBtn.dataset.size : 'medium';
+
+            const dimensions = {
+                '1:1': { small: '1024x1024', medium: '1024x1024', large: '1024x1024' },
+                '16:9': { small: '1344x768', medium: '1344x768', large: '1536x640' },
+                '2:3': { small: '896x1152', medium: '896x1152', large: '832x1216' },
+                '9:16': { small: '768x1344', medium: '768x1344', large: '640x1536' }
+            };
+
+            return dimensions[ratio][size] || '1024x1024';
+        }
+
+        function getSelectedAspectRatio() {
+            const activeRatioBtn = document.querySelector('.dimension-btn[data-ratio].active');
+            return activeRatioBtn ? activeRatioBtn.dataset.ratio : '1:1';
+        }
+
+        function updateSizeDisplay() {
+            const size = getSelectedImageSize();
+            document.querySelectorAll('.dimension-btn[data-size] .size-display').forEach(span => {
+                span.textContent = size;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.dimension-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const type = this.dataset.ratio ? 'ratio' : 'size';
+                    document.querySelectorAll(`.dimension-btn[data-${type}]`).forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    updateSizeDisplay();
+                });
+            });
+
+            // Set default active buttons
+            document.querySelector('.dimension-btn[data-ratio="1:1"]').classList.add('active');
+            document.querySelector('.dimension-btn[data-size="medium"]').classList.add('active');
+            document.getElementById('imageCountValue').textContent = document.getElementById('imageCount').value;
+
+            const promptInput = document.getElementById('prompt');
+            const generateBtn = document.getElementById('generateBtn');
+
+            promptInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    generateBtn.click();
+                }
+            });
+
+            updateSizeDisplay(); // Panggil ini di awal untuk menampilkan ukuran default
+        });
+
+        // Tambahkan event listener untuk mengupdate nilai yang ditampilkan
+        document.getElementById('imageCount').addEventListener('input', function() {
+            document.getElementById('imageCountValue').textContent = this.value;
+        });
+
+        function getSelectedImageCount() {
+            return parseInt(document.getElementById('imageCount').value);
+        }
+
+        // Tambahkan fungsi previewImage
+        function previewImage(index) {
+            const image = allGeneratedImages[index];
+            const previewOverlay = document.createElement('div');
+            previewOverlay.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+            previewOverlay.innerHTML = `
+                <div class="relative max-w-4xl w-full max-h-[90vh]">
+                    <img src="data:image/png;base64,${image.base64}" alt="Preview Image" class="max-w-full max-h-[90vh] object-contain mx-auto">
+                    <button class="absolute top-4 right-4 text-white hover:text-blue-300 p-2 rounded-full bg-black bg-opacity-50" onclick="closePreview()">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(previewOverlay);
+            document.body.style.overflow = 'hidden';
+
+            previewOverlay.addEventListener('click', function(event) {
+                if (event.target === previewOverlay) {
+                    closePreview();
+                }
+            });
+        }
+
+        function closePreview() {
+            const previewOverlay = document.querySelector('.fixed.inset-0.bg-black.bg-opacity-75');
+            if (previewOverlay) {
+                previewOverlay.remove();
+                document.body.style.overflow = ''; // Restore scrolling
+            }
+        }
+
+        function switchService(service) {
+            if (service === 'logout') {
+                logout();
+            } else {
+                console.log(`Switching to ${service}`);
+                // Di sini Anda bisa menambahkan logika untuk memuat konten yang sesuai
+                // atau beralih ke halaman yang berbeda tergantung pada layanan yang dipilih
+            }
+        }
+
+        // Fungsi simulasi untuk mengurangi kredit
+        function useCredits(amount) {
+            let currentCredits = parseInt(document.getElementById('userCredits').textContent);
+            if (currentCredits >= amount) {
+                currentCredits -= amount;
+                document.getElementById('userCredits').textContent = currentCredits;
+                return true;
+            } else {
+                alert("Not enough credits!");
+                return false;
+            }
+        }
+
+        // Tambahkan script ini di bagian atas file script Anda
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cek apakah user sudah login
+            if (!isLoggedIn()) {
+                window.location.href = '/index.html';
+            }
+        });
+
+        function isLoggedIn() {
+    return localStorage.getItem('authToken') !== null;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (!isLoggedIn()) {
+        window.location.href = '/login.html'; // Ubah ini dari '/index.html' menjadi '/login.html'
+    }
+});
+
+        // Tambahkan fungsi logout
+        function logout() {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('currentUser');
+    window.location.href = '/login.html';
+}
+    </script>
+</body>
+</html>
