@@ -144,10 +144,3 @@ try {
 }
 
 module.exports = app;
-
-// Comment out or remove the following lines:
-// app.listen(port, () => {
-//   console.log(`Server running at http://localhost:${port}`);
-//   console.log('Stability API Key loaded:', !!process.env.STABILITY_API_KEY);
-//   console.log('OpenAI API Key loaded:', !!process.env.OPENAI_API_KEY);
-// });
