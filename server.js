@@ -37,6 +37,11 @@ try {
     });
   });
 
+  // Tambahkan ini di bagian atas route Anda
+  app.get('/', (req, res) => {
+    res.send('Welcome to the Stability AI Web App');
+  });
+
   app.post('/generate-image', async (req, res) => {
     const { prompt, negativePrompt, imageCount, imageSize } = req.body;
     
