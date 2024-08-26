@@ -295,43 +295,6 @@
             return savedChat ? JSON.parse(savedChat) : [];
         }
 
-        // Tambahkan variabel ini di bagian atas script Anda
-        let lastRequestTime = 0;
-        const MIN_REQUEST_INTERVAL = 3000; // Increase to 3 seconds
-
-        async function callGPTAPI(message) {
-            try {
-                const now = Date.now();
-                if (now - lastRequestTime < MIN_REQUEST_INTERVAL) {
-                    await new Promise(resolve => setTimeout(resolve, MIN_REQUEST_INTERVAL - (now - lastRequestTime)));
-                }
-                lastRequestTime = Date.now();
-
-                const response = await fetch('/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message })
-                });
-
-                if (!response.ok) {
-                    if (response.status === 429) {
-                        // Tunggu sebentar dan coba lagi
-                        await new Promise(resolve => setTimeout(resolve, 2000));
-                        return callGPTAPI(message); // Rekursif, hati-hati dengan infinite loop
-                    }
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                return data.reply;
-            } catch (error) {
-                console.error("Error calling GPT API:", error);
-                return "Sorry, I encountered an error while processing your request. Please try again later.";
-            }
-        }
-
         // Ubah event listener form submission
         chatForm.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -340,9 +303,8 @@
                 addMessage('user', message);
                 userInput.value = '';
                 
-                // Panggil API GPT
-                const botResponse = await callGPTAPI(message);
-                addMessage('bot', botResponse);
+                // Tampilkan pesan bahwa fitur chat tidak tersedia
+                addMessage('bot', "I'm sorry, but the chat feature is currently unavailable. Please try the image generation feature instead.");
             }
         });
 

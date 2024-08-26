@@ -3,14 +3,11 @@ const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
-const OpenAI = require('openai');
 
 const app = express();
 const port = 3001;
 
 try {
-  // Semua kode setup dan route Anda di sini
-  
   app.use(cors());
   app.use(express.json());
   app.use(express.static('public'));
@@ -21,23 +18,19 @@ try {
     message: 'Too many requests from this IP, please try again after a minute'
   });
 
-  app.use('/chat', apiLimiter);
+  app.use('/generate-image', apiLimiter);
 
-  // Add this near the top of your routes
   app.get('/api-test', (req, res) => {
     res.json({ message: 'API is working' });
   });
 
-  // Tambahkan route debug
   app.get('/debug', (req, res) => {
     res.json({
       env: process.env.NODE_ENV,
       stability_api_key: !!process.env.STABILITY_API_KEY,
-      // Jangan tampilkan API key yang sebenarnya!
     });
   });
 
-  // Tambahkan ini di bagian atas route Anda
   app.get('/', (req, res) => {
     res.send('Welcome to the Stability AI Web App');
   });
@@ -95,42 +88,6 @@ try {
       console.error('Error:', error.response ? error.response.data : error.message);
       res.status(error.response ? error.response.status : 500).json({ 
         message: error.response ? error.response.data.message : 'An error occurred while generating the image(s)'
-      });
-    }
-  });
-
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-
-  app.post('/chat', async (req, res) => {
-    const { message } = req.body;
-
-    if (!message) {
-      return res.status(400).json({ message: 'Message is required' });
-    }
-
-    try {
-      const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-          { role: "system", content: "You are a helpful assistant." },
-          { role: "user", content: message }
-        ],
-      });
-
-      console.log('OpenAI API Response:', completion.choices[0]);
-
-      if (!completion.choices || !completion.choices[0] || !completion.choices[0].message) {
-        throw new Error('Invalid response from OpenAI API');
-      }
-
-      res.json({ reply: completion.choices[0].message.content });
-    } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ 
-        message: 'An error occurred while processing the chat message',
-        error: error.message
       });
     }
   });
