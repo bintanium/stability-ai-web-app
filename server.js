@@ -3,6 +3,7 @@ const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 
 const app = express();
 const port = 3001;
@@ -32,7 +33,7 @@ try {
   });
 
   app.get('/', (req, res) => {
-    res.send('Welcome to the Stability AI Web App');
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
   });
 
   app.post('/generate-image', async (req, res) => {
