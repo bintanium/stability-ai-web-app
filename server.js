@@ -93,6 +93,11 @@ try {
     }
   });
 
+  // Tambahkan ini untuk menangani semua rute yang tidak cocok dengan file statis
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  });
+
 } catch (error) {
   console.error('Uncaught error:', error);
   app.use((err, req, res, next) => {
