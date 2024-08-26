@@ -20,6 +20,11 @@ const apiLimiter = rateLimit({
 
 app.use('/chat', apiLimiter);
 
+// Add this near the top of your routes
+app.get('/api-test', (req, res) => {
+  res.json({ message: 'API is working' });
+});
+
 app.post('/generate-image', async (req, res) => {
   const { prompt, negativePrompt, imageCount, imageSize } = req.body;
   
@@ -113,8 +118,12 @@ app.post('/chat', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-  console.log('Stability API Key loaded:', !!process.env.STABILITY_API_KEY);
-  console.log('OpenAI API Key loaded:', !!process.env.OPENAI_API_KEY);
-});
+// Export the Express API as a serverless function
+module.exports = app;
+
+// Comment out or remove the following lines:
+// app.listen(port, () => {
+//   console.log(`Server running at http://localhost:${port}`);
+//   console.log('Stability API Key loaded:', !!process.env.STABILITY_API_KEY);
+//   console.log('OpenAI API Key loaded:', !!process.env.OPENAI_API_KEY);
+// });
