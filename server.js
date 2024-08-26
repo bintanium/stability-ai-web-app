@@ -36,6 +36,14 @@ try {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
   });
 
+  app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+  });
+
+  app.get('/signup', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'signup.html'));
+  });
+
   app.post('/generate-image', async (req, res) => {
     const { prompt, negativePrompt, imageCount, imageSize } = req.body;
     
