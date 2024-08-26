@@ -34,16 +34,33 @@ try {
 
   app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
-  });
+});
 
-  app.get('/login', (req, res) => {
+app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
-  });
+});
 
-  app.get('/signup', (req, res) => {
+app.get('/signup', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'signup.html'));
-  });
+});
 
+// Tambahkan rute untuk halaman-halaman lain yang memerlukan autentikasi
+app.get('/imagegeneration', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'imagegeneration.html'));
+});
+
+app.get('/chatgpt', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'chatgpt.html'));
+});
+
+app.get('/suno', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'suno.html'));
+});
+
+// Rute catch-all harus berada di paling bawah
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
   app.post('/generate-image', async (req, res) => {
     const { prompt, negativePrompt, imageCount, imageSize } = req.body;
     

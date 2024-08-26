@@ -246,5 +246,18 @@
 
         fadeElems.forEach(elem => observer.observe(elem));
     </script>
+
+    <script>
+        // Cek status login saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            if (isLoggedIn()) {
+                window.location.href = '/imagegeneration.html'; // Atau halaman lain yang sesuai untuk pengguna yang sudah login
+            }
+        });
+
+        function isLoggedIn() {
+            return localStorage.getItem('authToken') !== null;
+        }
+    </script>
 </body>
 </html>
